@@ -516,12 +516,12 @@ export default function Home() {
                         <span className="text-xs font-bold text-blue-600">{job.salaryRate}</span>
                       </div>
                       
-                      <button 
-                        type="button"
+                      <Link 
+                        href={`/jobs/${job.id}`}
                         className="inline-flex items-center justify-center rounded-xl bg-blue-50 hover:bg-blue-600 text-blue-600 hover:text-white px-3 py-1.5 text-xs font-semibold transition cursor-pointer"
                       >
                         Apply Now
-                      </button>
+                      </Link>
                     </div>
 
                   </div>
