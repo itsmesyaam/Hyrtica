@@ -66,6 +66,7 @@ function getPineconeClient(): Pinecone | null {
     }
     return pineconeClient
   }
+  console.warn('[Pinecone Warning] PINECONE_API_KEY environment variable is not set. Operating with fallback vector store.')
   return null
 }
 

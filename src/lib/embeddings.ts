@@ -36,6 +36,8 @@ export async function generateEmbedding768(text: string): Promise<number[]> {
     } catch (e) {
       console.warn('Gemini 768 embedding call failed, using mock generator:', e)
     }
+  } else {
+    console.warn('[Gemini Warning] GEMINI_API_KEY environment variable is not set. Using deterministic fallback vector embedding generator.')
   }
 
   return generateMockEmbedding768(text)
