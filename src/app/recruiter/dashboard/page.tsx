@@ -9,7 +9,8 @@ import {
   X, Phone, Mail, Link2, CheckCircle2, Clock, 
   Check, RefreshCw, Cpu, Sparkles, FileDown, 
   CalendarRange, MessageSquare, Save, Users, 
-  GraduationCap, Calendar, Star, Building2, Eye
+  GraduationCap, Calendar, Star, Building2, Eye,
+  ClipboardList, Send, Plus
 } from 'lucide-react'
 
 // Define interfaces
@@ -617,6 +618,88 @@ export default function RecruiterDashboard() {
 
   const [selectedAiJob, setSelectedAiJob] = useState<JobCard | null>(null)
   const [loadingAiJobId, setLoadingAiJobId] = useState<string | null>(null)
+
+  // Drawer Tabs & Tasks / Messaging State
+  const [drawerTab, setDrawerTab] = useState<'profile' | 'messages'>('profile')
+  const [showAssignTaskModal, setShowAssignTaskModal] = useState<boolean>(false)
+  const [taskTitle, setTaskTitle] = useState('')
+  const [taskDescription, setTaskDescription] = useState('')
+  const [taskDueDate, setTaskDueDate] = useState('')
+  const [assigningTask, setAssigningTask] = useState(false)
+
+  const [drawerMessages, setDrawerMessages] = useState<any[]>([])
+  const [newMessageContent, setNewMessageContent] = useState('')
+  const [sendingMessage, setSendingMessage] = useState(false)
+
+  useEffect(() => {
+    if (selectedCandidate) {
+      fetch(`/api/messages?candidateId=${selectedCandidate.id}`)
+        .then(res => res.json())
+        .then(res => {
+          if (res.success && Array.isArray(res.messages)) {
+            setDrawerMessages(res.messages)
+          }
+        })
+        .catch(e => console.error('Failed to fetch drawer messages:', e))
+    }
+  }, [selectedCandidate, drawerTab])
+
+  const handleAssignTask = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!selectedCandidate || !taskTitle || !taskDescription) return
+    setAssigningTask(true)
+    try {
+      const res = await fetch('/api/tasks', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          candidateId: selectedCandidate.id,
+          title: taskTitle,
+          description: taskDescription,
+          dueDate: taskDueDate
+        })
+      })
+      const json = await res.json()
+      if (json.success) {
+        setAlertMsg(`Assessment Task assigned to ${selectedCandidate.name}!`)
+        setShowAssignTaskModal(false)
+        setTaskTitle('')
+        setTaskDescription('')
+        setTaskDueDate('')
+        setTimeout(() => setAlertMsg(null), 3500)
+      }
+    } catch (err) {
+      console.error('Failed to assign task:', err)
+    } finally {
+      setAssigningTask(false)
+    }
+  }
+
+  const handleSendRecruiterMessage = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!selectedCandidate || !newMessageContent.trim()) return
+    setSendingMessage(true)
+    try {
+      const res = await fetch('/api/messages', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          candidateId: selectedCandidate.id,
+          sender: 'RECRUITER',
+          content: newMessageContent.trim()
+        })
+      })
+      const json = await res.json()
+      if (json.success && json.chatMessage) {
+        setDrawerMessages(prev => [...prev, json.chatMessage])
+        setNewMessageContent('')
+      }
+    } catch (err) {
+      console.error('Failed to send recruiter message:', err)
+    } finally {
+      setSendingMessage(false)
+    }
+  }
 
   useEffect(() => {
     if (selectedAiJob) return // Don't override AI match search with default fetch
@@ -1383,8 +1466,34 @@ export default function RecruiterDashboard() {
               </div>
             </div>
 
-            {/* Scrollable parsed details */}
-            <div className="flex-1 overflow-y-auto px-6 py-6 space-y-6">
+            {/* Tab Navigation (Profile vs Direct Messaging) */}
+            <div className="flex items-center gap-2 border-b border-slate-100 px-6 pt-3 bg-slate-50/50">
+              <button
+                onClick={() => setDrawerTab('profile')}
+                className={`pb-2.5 px-3 text-xs font-extrabold uppercase tracking-wider transition border-b-2 cursor-pointer ${
+                  drawerTab === 'profile'
+                    ? 'border-blue-600 text-blue-600'
+                    : 'border-transparent text-slate-400 hover:text-slate-700'
+                }`}
+              >
+                Candidate Profile
+              </button>
+              <button
+                onClick={() => setDrawerTab('messages')}
+                className={`pb-2.5 px-3 text-xs font-extrabold uppercase tracking-wider transition border-b-2 cursor-pointer flex items-center gap-1.5 ${
+                  drawerTab === 'messages'
+                    ? 'border-blue-600 text-blue-600'
+                    : 'border-transparent text-slate-400 hover:text-slate-700'
+                }`}
+              >
+                <MessageSquare className="h-3.5 w-3.5" />
+                Direct Messaging ({drawerMessages.length})
+              </button>
+            </div>
+
+            {/* Scrollable Content Body */}
+            {drawerTab === 'profile' ? (
+              <div className="flex-1 overflow-y-auto px-6 py-6 space-y-6">
               
               {/* AI extracted core competencies */}
               <div className="flex flex-col gap-2">
@@ -1506,11 +1615,87 @@ export default function RecruiterDashboard() {
                   </div>
                 </div>
               </div>
-
             </div>
+            ) : (
+              /* Direct Messaging Chat Tab */
+              <div className="flex-1 flex flex-col overflow-hidden bg-slate-50/50">
+                <div className="p-4 bg-white border-b border-slate-100 flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <MessageSquare className="h-4 w-4 text-blue-600" />
+                    <span className="text-xs font-bold text-slate-800">
+                      Direct Chat with {selectedCandidate.name}
+                    </span>
+                  </div>
+                  <span className="text-3xs font-extrabold text-emerald-700 bg-emerald-50 border border-emerald-200 px-2.5 py-0.5 rounded-full uppercase">
+                    Encrypted Thread
+                  </span>
+                </div>
+
+                {/* Messages Thread */}
+                <div className="flex-1 overflow-y-auto p-4 space-y-3">
+                  {drawerMessages.length === 0 ? (
+                    <div className="text-center py-10 text-slate-400 text-xs">
+                      No message history yet. Send a direct message below.
+                    </div>
+                  ) : (
+                    drawerMessages.map(msg => {
+                      const isRecruiter = msg.sender === 'RECRUITER'
+                      return (
+                        <div
+                          key={msg.id}
+                          className={`flex flex-col ${isRecruiter ? 'items-end' : 'items-start'}`}
+                        >
+                          <div
+                            className={`max-w-md rounded-2xl px-4 py-2.5 text-xs shadow-xs ${
+                              isRecruiter
+                                ? 'bg-blue-600 text-white rounded-br-none'
+                                : 'bg-white border border-slate-200 text-slate-800 rounded-bl-none'
+                            }`}
+                          >
+                            <span className="block font-extrabold text-3xs uppercase tracking-wider mb-0.5 opacity-80">
+                              {isRecruiter ? 'You (Recruiter)' : selectedCandidate.name}
+                            </span>
+                            <p className="leading-relaxed">{msg.content}</p>
+                          </div>
+                          <span className="text-3xs text-slate-400 mt-1 px-1 font-semibold">
+                            {new Date(msg.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                          </span>
+                        </div>
+                      )
+                    })
+                  )}
+                </div>
+
+                {/* Input box */}
+                <form onSubmit={handleSendRecruiterMessage} className="p-3 bg-white border-t border-slate-100 flex items-center gap-2">
+                  <input
+                    type="text"
+                    placeholder={`Message ${selectedCandidate.name}...`}
+                    value={newMessageContent}
+                    onChange={e => setNewMessageContent(e.target.value)}
+                    className="flex-1 rounded-xl border border-slate-200 bg-slate-50 px-3.5 py-2 text-xs text-slate-800 placeholder-slate-400 outline-none focus:border-blue-500 transition"
+                  />
+                  <button
+                    type="submit"
+                    disabled={sendingMessage || !newMessageContent.trim()}
+                    className="rounded-xl bg-blue-600 hover:bg-blue-700 px-4 py-2 text-xs font-bold text-white transition shadow shadow-blue-600/10 cursor-pointer flex items-center gap-1.5 disabled:opacity-50"
+                  >
+                    <Send className="h-3.5 w-3.5" />
+                    <span>Send</span>
+                  </button>
+                </form>
+              </div>
+            )}
 
             {/* Bottom Actions Drawer Footer */}
             <div className="px-6 py-5 border-t border-slate-100 bg-slate-50/50 flex flex-col sm:flex-row gap-3">
+              <button
+                onClick={() => setShowAssignTaskModal(true)}
+                className="flex-1 flex items-center justify-center gap-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 py-3 text-xs font-extrabold text-white transition shadow-sm cursor-pointer"
+              >
+                <ClipboardList className="h-4 w-4" />
+                Assign Task
+              </button>
               <button
                 onClick={() => handleShortlistToggle(selectedCandidate.id)}
                 className={`flex-1 flex items-center justify-center gap-2 rounded-xl py-3 text-sm font-semibold transition cursor-pointer border ${
@@ -1561,6 +1746,87 @@ export default function RecruiterDashboard() {
 
           </div>
 
+        </div>
+      )}
+
+      {/* Assign Assessment Task Modal */}
+      {showAssignTaskModal && selectedCandidate && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-xs p-4 animate-fade-in">
+          <div className="bg-white rounded-3xl max-w-lg w-full p-6 shadow-2xl border border-slate-100 space-y-4">
+            <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+              <div className="flex items-center gap-2">
+                <ClipboardList className="h-5 w-5 text-indigo-600" />
+                <h3 className="text-base font-extrabold text-slate-900">
+                  Assign Assessment Task to {selectedCandidate.name}
+                </h3>
+              </div>
+              <button
+                onClick={() => setShowAssignTaskModal(false)}
+                className="text-slate-400 hover:text-slate-700 cursor-pointer p-1"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            </div>
+
+            <form onSubmit={handleAssignTask} className="space-y-4 text-xs">
+              <div>
+                <label className="text-3xs font-extrabold text-slate-400 uppercase tracking-wider block mb-1">
+                  Task Title
+                </label>
+                <input
+                  type="text"
+                  required
+                  placeholder="e.g. Distributed Concurrency Assessment"
+                  value={taskTitle}
+                  onChange={e => setTaskTitle(e.target.value)}
+                  className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3.5 py-2.5 font-bold text-slate-800 outline-none focus:border-indigo-500 transition"
+                />
+              </div>
+
+              <div>
+                <label className="text-3xs font-extrabold text-slate-400 uppercase tracking-wider block mb-1">
+                  Task Description & Submission Instructions
+                </label>
+                <textarea
+                  rows={4}
+                  required
+                  placeholder="Describe the coding exercise, system design requirements, or test criteria..."
+                  value={taskDescription}
+                  onChange={e => setTaskDescription(e.target.value)}
+                  className="w-full rounded-xl border border-slate-200 bg-slate-50 p-3.5 font-semibold text-slate-800 outline-none focus:border-indigo-500 transition"
+                ></textarea>
+              </div>
+
+              <div>
+                <label className="text-3xs font-extrabold text-slate-400 uppercase tracking-wider block mb-1">
+                  Submission Due Date
+                </label>
+                <input
+                  type="date"
+                  value={taskDueDate}
+                  onChange={e => setTaskDueDate(e.target.value)}
+                  className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3.5 py-2.5 font-semibold text-slate-800 outline-none focus:border-indigo-500 transition"
+                />
+              </div>
+
+              <div className="flex items-center justify-end gap-3 pt-2 border-t border-slate-100">
+                <button
+                  type="button"
+                  onClick={() => setShowAssignTaskModal(false)}
+                  className="rounded-xl border border-slate-200 bg-white hover:bg-slate-50 px-4 py-2.5 font-bold text-slate-600 transition cursor-pointer"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={assigningTask}
+                  className="rounded-xl bg-indigo-600 hover:bg-indigo-700 px-5 py-2.5 font-extrabold text-white transition shadow shadow-indigo-600/10 cursor-pointer disabled:opacity-50"
+                >
+                  {assigningTask ? 'Assigning Task...' : 'Confirm Task Assignment'}
+                </button>
+              </div>
+            </form>
+          </div>
         </div>
       )}
 

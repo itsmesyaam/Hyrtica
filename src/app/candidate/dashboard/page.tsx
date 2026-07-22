@@ -7,7 +7,8 @@ import {
   Hexagon, User, Briefcase, MapPin, Award, 
   CheckCircle2, Clock, UploadCloud, FileText, 
   Check, ChevronRight, X, Sparkles, Building2, 
-  Calendar, TrendingUp, AlertCircle, RefreshCw, Cpu
+  Calendar, TrendingUp, AlertCircle, RefreshCw, Cpu,
+  ClipboardList, MessageSquare, Send
 } from 'lucide-react'
 
 // Interfaces
@@ -119,6 +120,59 @@ export default function CandidateDashboard() {
     "Generating search embeddings...",
     "Profile created successfully!"
   ]
+
+  // Tasks & Messaging State
+  const [assignedTasks, setAssignedTasks] = useState<any[]>([])
+  const [candidateMessages, setCandidateMessages] = useState<any[]>([])
+  const [candidateReplyContent, setCandidateReplyContent] = useState('')
+  const [sendingCandidateReply, setSendingCandidateReply] = useState(false)
+
+  // Fetch Tasks & Messages on load
+  useEffect(() => {
+    fetch('/api/tasks?candidateId=1')
+      .then(res => res.json())
+      .then(res => {
+        if (res.success && Array.isArray(res.tasks)) {
+          setAssignedTasks(res.tasks)
+        }
+      })
+      .catch(e => console.error('Failed to fetch candidate tasks:', e))
+
+    fetch('/api/messages?candidateId=1')
+      .then(res => res.json())
+      .then(res => {
+        if (res.success && Array.isArray(res.messages)) {
+          setCandidateMessages(res.messages)
+        }
+      })
+      .catch(e => console.error('Failed to fetch candidate messages:', e))
+  }, [])
+
+  const handleSendCandidateReply = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!candidateReplyContent.trim()) return
+    setSendingCandidateReply(true)
+    try {
+      const res = await fetch('/api/messages', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          candidateId: '1',
+          sender: 'CANDIDATE',
+          content: candidateReplyContent.trim()
+        })
+      })
+      const json = await res.json()
+      if (json.success && json.chatMessage) {
+        setCandidateMessages(prev => [...prev, json.chatMessage])
+        setCandidateReplyContent('')
+      }
+    } catch (err) {
+      console.error('Failed to send candidate reply:', err)
+    } finally {
+      setSendingCandidateReply(false)
+    }
+  }
 
   // Notification state
   const [notification, setNotification] = useState<string | null>(null)
@@ -695,6 +749,133 @@ export default function CandidateDashboard() {
                 ))
               )}
             </div>
+
+          </div>
+
+        </div>
+
+        {/* 5. My Assigned Assessments / Tasks & 6. Employer Chat Widgets */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start mt-6">
+          
+          {/* Assigned Tasks Card Column */}
+          <div className="rounded-2xl border border-slate-100 bg-white p-6 shadow-sm lg:col-span-6 flex flex-col gap-5">
+            <div className="flex items-center justify-between border-b border-slate-100 pb-3.5">
+              <div className="flex items-center gap-2">
+                <ClipboardList className="h-5 w-5 text-indigo-600" />
+                <div>
+                  <h2 className="text-base font-extrabold text-slate-900 uppercase tracking-wide">
+                    My Assigned Assessments / Tasks
+                  </h2>
+                  <p className="text-3xs text-slate-400">Coding exercises & system architecture tests assigned by recruiters.</p>
+                </div>
+              </div>
+              <span className="text-3xs font-extrabold text-indigo-700 bg-indigo-50 border border-indigo-200 px-2.5 py-1 rounded-full uppercase">
+                {assignedTasks.length} Assigned
+              </span>
+            </div>
+
+            <div className="space-y-3 min-h-[180px]">
+              {assignedTasks.length === 0 ? (
+                <div className="py-10 text-center text-slate-400 border border-dashed border-slate-100 rounded-xl text-xs">
+                  No pending assessment tasks assigned yet.
+                </div>
+              ) : (
+                assignedTasks.map(t => (
+                  <div key={t.id} className="rounded-xl border border-slate-150 bg-slate-50/60 p-4 space-y-2 hover:border-indigo-200 transition">
+                    <div className="flex items-center justify-between font-bold text-xs text-slate-900">
+                      <span className="flex items-center gap-1.5">
+                        <CheckCircle2 className="h-4 w-4 text-indigo-600 shrink-0" />
+                        {t.title}
+                      </span>
+                      <span className="text-3xs font-extrabold text-amber-700 bg-amber-50 border border-amber-200 px-2 py-0.5 rounded-full uppercase">
+                        {t.status}
+                      </span>
+                    </div>
+                    <p className="text-2xs text-slate-600 leading-relaxed">{t.description}</p>
+                    <div className="flex items-center justify-between pt-2 border-t border-slate-100 text-3xs font-semibold text-slate-400">
+                      <span className="flex items-center gap-1">
+                        <Clock className="h-3 w-3 text-slate-400" /> Due: {new Date(t.dueDate).toLocaleDateString()}
+                      </span>
+                      <button className="text-indigo-600 hover:underline font-bold cursor-pointer">
+                        Start Task &rarr;
+                      </button>
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
+          </div>
+
+          {/* Employer Direct Chat Widget Column */}
+          <div className="rounded-2xl border border-slate-100 bg-white p-6 shadow-sm lg:col-span-6 flex flex-col gap-4">
+            <div className="flex items-center justify-between border-b border-slate-100 pb-3.5">
+              <div className="flex items-center gap-2">
+                <MessageSquare className="h-5 w-5 text-blue-600" />
+                <div>
+                  <h2 className="text-base font-extrabold text-slate-900 uppercase tracking-wide">
+                    Employer Direct Chat
+                  </h2>
+                  <p className="text-3xs text-slate-400">Direct message exchange with hiring recruiters.</p>
+                </div>
+              </div>
+              <span className="text-3xs font-extrabold text-emerald-700 bg-emerald-50 border border-emerald-200 px-2.5 py-1 rounded-full uppercase">
+                Active Thread
+              </span>
+            </div>
+
+            {/* Chat Thread */}
+            <div className="h-[220px] overflow-y-auto bg-slate-50/70 border border-slate-100 rounded-xl p-3.5 space-y-3">
+              {candidateMessages.length === 0 ? (
+                <div className="py-12 text-center text-slate-400 text-xs">
+                  No recruiter messages yet.
+                </div>
+              ) : (
+                candidateMessages.map(msg => {
+                  const isCandidate = msg.sender === 'CANDIDATE'
+                  return (
+                    <div
+                      key={msg.id}
+                      className={`flex flex-col ${isCandidate ? 'items-end' : 'items-start'}`}
+                    >
+                      <div
+                        className={`max-w-sm rounded-2xl px-3.5 py-2 text-xs shadow-2xs ${
+                          isCandidate
+                            ? 'bg-blue-600 text-white rounded-br-none'
+                            : 'bg-white border border-slate-200 text-slate-800 rounded-bl-none'
+                        }`}
+                      >
+                        <span className="block font-extrabold text-3xs uppercase tracking-wider mb-0.5 opacity-80">
+                          {isCandidate ? 'You' : 'Hiring Recruiter'}
+                        </span>
+                        <p className="leading-relaxed">{msg.content}</p>
+                      </div>
+                      <span className="text-3xs text-slate-400 mt-1 px-1 font-semibold">
+                        {new Date(msg.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                      </span>
+                    </div>
+                  )
+                })
+              )}
+            </div>
+
+            {/* Candidate Reply Input Form */}
+            <form onSubmit={handleSendCandidateReply} className="flex items-center gap-2">
+              <input
+                type="text"
+                placeholder="Reply to employer..."
+                value={candidateReplyContent}
+                onChange={e => setCandidateReplyContent(e.target.value)}
+                className="flex-1 rounded-xl border border-slate-200 bg-slate-50 px-3.5 py-2 text-xs text-slate-800 placeholder-slate-400 outline-none focus:border-blue-500 transition"
+              />
+              <button
+                type="submit"
+                disabled={sendingCandidateReply || !candidateReplyContent.trim()}
+                className="rounded-xl bg-blue-600 hover:bg-blue-700 px-4 py-2 text-xs font-bold text-white transition shadow shadow-blue-600/10 cursor-pointer flex items-center gap-1.5 disabled:opacity-50"
+              >
+                <Send className="h-3.5 w-3.5" />
+                <span>Reply</span>
+              </button>
+            </form>
 
           </div>
 
