@@ -31,41 +31,8 @@ interface RecommendedJob {
   skills: string[]
 }
 
-// Initial applications
-const INITIAL_APPLICATIONS: Application[] = [
-  {
-    id: '1',
-    title: 'Frontend Developer',
-    company: 'Amazon',
-    logoBg: 'bg-sky-100 text-sky-600',
-    appliedDate: 'Jul 10, 2026',
-    status: 'Applied'
-  },
-  {
-    id: '2',
-    title: 'Senior Systems Analyst',
-    company: 'Tesla',
-    logoBg: 'bg-amber-100 text-amber-600',
-    appliedDate: 'Jul 05, 2026',
-    status: 'Under Review'
-  },
-  {
-    id: '3',
-    title: 'Lead React Developer',
-    company: 'Percepta',
-    logoBg: 'bg-teal-100 text-teal-600',
-    appliedDate: 'Jul 12, 2026',
-    status: 'Interview Scheduled'
-  },
-  {
-    id: '4',
-    title: 'Cloud Architect',
-    company: 'Microsoft',
-    logoBg: 'bg-indigo-100 text-indigo-600',
-    appliedDate: 'Jun 28, 2026',
-    status: 'Offers'
-  }
-]
+// Initial applications array (Empty for clean production slate)
+const INITIAL_APPLICATIONS: Application[] = []
 
 const RECOMMENDED_JOBS: RecommendedJob[] = [
   {

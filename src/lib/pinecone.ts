@@ -14,33 +14,12 @@ export interface PineconeMatchResult {
   metadata?: CandidateVectorMetadata
 }
 
-// In-memory fallback vector store for local testing without Pinecone credentials
+// In-memory fallback vector store for clean production startup
 const mockVectorStore: Array<{
   id: string
   values: number[]
   metadata: CandidateVectorMetadata
-}> = [
-  {
-    id: "4",
-    values: Array(768).fill(0.1),
-    metadata: { fullName: "Sneha Reddy", skills: ["Node.js", "React", "Python"], yearsOfExperience: 4, location: "Remote" }
-  },
-  {
-    id: "1",
-    values: Array(768).fill(0.08),
-    metadata: { fullName: "Amit Sharma", skills: ["Python", "React", "AWS"], yearsOfExperience: 8, location: "Hybrid" }
-  },
-  {
-    id: "3",
-    values: Array(768).fill(0.05),
-    metadata: { fullName: "Rajesh Kumar", skills: ["React", "TypeScript", "CSS"], yearsOfExperience: 3, location: "On-site" }
-  },
-  {
-    id: "2",
-    values: Array(768).fill(0.04),
-    metadata: { fullName: "Priya Patel", skills: ["AWS", "Docker", "Kubernetes"], yearsOfExperience: 6, location: "Remote" }
-  }
-]
+}> = []
 
 function calculateCosineSimilarity(vecA: number[], vecB: number[]): number {
   if (!vecA || !vecB || vecA.length === 0 || vecB.length === 0) return 0.8
