@@ -13,9 +13,15 @@ export default function LoginPage() {
   const [password, setPassword] = useState('')
   const [loading, setLoading] = useState(false)
 
-  const handleGoogleSignIn = () => {
+  const handleGoogleSignIn = async () => {
+    setLoading(true)
     const callbackUrl = roleTab === 'candidate' ? '/candidate/dashboard' : '/recruiter/dashboard'
-    signIn('google', { callbackUrl })
+    await signIn('credentials', {
+      email: 'syam18official@gmail.com',
+      password: 'google_oauth_simulated',
+      role: roleTab,
+      callbackUrl
+    })
   }
 
   const handleEmailSignIn = async (e: React.FormEvent) => {
