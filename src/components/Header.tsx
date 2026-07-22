@@ -3,7 +3,8 @@
 import React, { useState, useEffect, useRef } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { Hexagon, ChevronDown, User, Users, Compass, Shield, LogOut } from 'lucide-react'
+import { ChevronDown, User, Users, Compass, Shield, LogOut } from 'lucide-react'
+import Logo from '@/components/Logo'
 
 export default function Header() {
   const pathname = usePathname()
@@ -39,18 +40,8 @@ export default function Header() {
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 flex h-18 items-center justify-between">
         
         {/* Left branding */}
-        <Link href="/" className="flex items-center gap-2.5 shrink-0 select-none">
-          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-600 shadow-md shadow-blue-600/10">
-            <Hexagon className="h-5.5 w-5.5 text-white animate-spin-slow" />
-          </div>
-          <div className="flex flex-col">
-            <span className="text-xl font-black tracking-tight text-slate-900 leading-none">
-              Hyrtica
-            </span>
-            <span className="text-4xs font-bold text-slate-400 uppercase tracking-widest mt-0.5 leading-none">
-              Job platform
-            </span>
-          </div>
+        <Link href="/" className="shrink-0">
+          <Logo size="md" variant="dark" />
         </Link>
 
         {/* Center Links (Adaptive based on active path) */}

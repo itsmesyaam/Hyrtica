@@ -6,7 +6,7 @@ import Header from '@/components/Header'
 import { 
   Hexagon, User, Briefcase, MapPin, Award, 
   CheckCircle2, Clock, UploadCloud, FileText, 
-  Check, ChevronRight, X, Sparkles, Building2, 
+  Check, ChevronRight, ChevronDown, X, Sparkles, Building2, 
   Calendar, TrendingUp, AlertCircle, RefreshCw, Cpu,
   ClipboardList, MessageSquare, Send
 } from 'lucide-react'

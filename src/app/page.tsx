@@ -3,6 +3,7 @@
 import React, { useState, useMemo, useEffect } from 'react'
 import Image from 'next/image'
 import Header from '@/components/Header'
+import Logo from '@/components/Logo'
 import { 
   Hexagon, ChevronDown, Briefcase, MapPin, 
   Search, Users, Edit3, ShieldAlert, Code, 
@@ -534,11 +535,8 @@ export default function Home() {
       {/* Corporate Clean Footer */}
       <footer className="border-t border-slate-100 bg-slate-50/50 py-10 mt-12">
         <div className="mx-auto max-w-7xl px-4 text-center sm:px-6 lg:px-8">
-          <div className="flex items-center justify-center gap-2">
-            <div className="h-6 w-6 rounded bg-blue-600 flex items-center justify-center text-white text-xs font-black">
-              H
-            </div>
-            <span className="font-black text-slate-900 tracking-tight">Hyrtica</span>
+          <div className="flex items-center justify-center">
+            <Logo size="sm" />
           </div>
           <p className="text-2xs text-slate-400 mt-4">
             © 2026 Hyrtica Systems Inc. Powered by JobBox layout design guides. Secured under Corporate SSL Certificates.
