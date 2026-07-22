@@ -4,6 +4,8 @@ import { queryTopCandidates } from '@/lib/pinecone'
 import { getCandidatesByIds } from '@/lib/db'
 import prisma from '@/lib/prisma'
 
+export const dynamic = 'force-dynamic'
+
 const RATIONALE_MAP: Record<string, string> = {
   '1': 'Strong background in distributed systems and backend engineering matching job requirement for Senior Engineer.',
   '2': 'Deep expertise in AWS, Docker, & Kubernetes aligning with cloud infrastructure role.',

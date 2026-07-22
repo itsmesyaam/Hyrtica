@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 import prisma from '@/lib/prisma'
 
+export const dynamic = 'force-dynamic'
+
 // 10 baseline mock candidates matching the recruiter UI
 const BASELINE_MOCK_CANDIDATES = [
   {
