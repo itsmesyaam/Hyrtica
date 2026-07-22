@@ -1,5 +1,5 @@
-import prisma from '../src/lib/prisma'
-import { resetPineconeIndex } from '../src/lib/pinecone'
+import prisma from '../src/lib/prisma.ts'
+import { resetPineconeIndex } from '../src/lib/pinecone.ts'
 
 async function resetDatabaseAndVectors() {
   console.log('🧹 Starting Hyrtica production database & Pinecone cleanup...')

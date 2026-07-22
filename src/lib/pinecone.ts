@@ -71,6 +71,28 @@ function getPineconeClient(): Pinecone | null {
 }
 
 /**
+ * Reset all vectors in Pinecone Index and clear in-memory fallback store
+ */
+export async function resetPineconeIndex(): Promise<boolean> {
+  const pc = getPineconeClient()
+  const indexName = process.env.PINECONE_INDEX || 'hyrtica-candidates'
+
+  if (pc) {
+    try {
+      const index = pc.index(indexName)
+      await index.deleteAll()
+      console.log(`[Pinecone] Successfully wiped all vectors from index ${indexName}`)
+    } catch (error) {
+      console.warn('[Pinecone] Failed to delete all vectors from index:', error)
+    }
+  }
+
+  mockVectorStore.length = 0
+  console.log('[Pinecone-Fallback] In-memory vector store wiped clean.')
+  return true
+}
+
+/**
  * Upsert candidate 768-dim vector & metadata into Pinecone Index (or local fallback)
  */
 export async function upsertCandidateVector(
