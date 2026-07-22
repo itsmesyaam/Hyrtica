@@ -18,12 +18,16 @@ export default function LoginPage() {
     signIn('google', { callbackUrl })
   }
 
-  const handleEmailSignIn = (e: React.FormEvent) => {
+  const handleEmailSignIn = async (e: React.FormEvent) => {
     e.preventDefault()
     setLoading(true)
-    setTimeout(() => {
-      window.location.href = roleTab === 'candidate' ? '/candidate/dashboard' : '/recruiter/dashboard'
-    }, 600)
+    const callbackUrl = roleTab === 'candidate' ? '/candidate/dashboard' : '/recruiter/dashboard'
+    await signIn('credentials', {
+      email,
+      password,
+      role: roleTab,
+      callbackUrl
+    })
   }
 
   return (
