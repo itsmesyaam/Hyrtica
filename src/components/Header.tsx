@@ -4,10 +4,12 @@ import React, { useState, useEffect, useRef } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { ChevronDown, User, Users, Compass, Shield, LogOut } from 'lucide-react'
+import { useSession, signOut } from 'next-auth/react'
 import Logo from '@/components/Logo'
 
 export default function Header() {
   const pathname = usePathname()
+  const { data: session, status } = useSession()
   const [dropdownOpen, setDropdownOpen] = useState(false)
   const dropdownRef = useRef<HTMLDivElement>(null)
 
@@ -142,10 +144,36 @@ export default function Header() {
             )}
           </div>
 
-          {/* Core Access Button */}
-          <a href="#" className="hidden sm:inline-flex items-center justify-center rounded-full bg-slate-900 hover:bg-slate-800 px-5 py-2 text-xs font-bold text-white shadow-md transition cursor-pointer">
-            Sign in
-          </a>
+          {/* Dynamic Auth Button */}
+          {session?.user ? (
+            <div className="flex items-center gap-3">
+              <div className="flex items-center gap-2 bg-slate-50 border border-slate-200/80 rounded-full px-3 py-1.5 text-xs font-bold text-slate-800">
+                {session.user.image ? (
+                  <img src={session.user.image} alt={session.user.name || 'User'} className="h-5 w-5 rounded-full" />
+                ) : (
+                  <div className="h-5 w-5 rounded-full bg-blue-600 text-white flex items-center justify-center text-3xs font-black">
+                    {session.user.name?.charAt(0) || 'U'}
+                  </div>
+                )}
+                <span className="hidden sm:inline font-extrabold">{session.user.name || 'Account'}</span>
+              </div>
+
+              <button
+                onClick={() => signOut({ callbackUrl: '/' })}
+                className="inline-flex items-center justify-center gap-1 rounded-full border border-slate-200 bg-white hover:bg-slate-50 px-3.5 py-1.5 text-xs font-bold text-slate-600 transition cursor-pointer"
+              >
+                <LogOut className="h-3.5 w-3.5 text-slate-400" />
+                <span>Sign Out</span>
+              </button>
+            </div>
+          ) : (
+            <Link
+              href="/login"
+              className="inline-flex items-center justify-center rounded-full bg-blue-600 hover:bg-blue-700 px-5 py-2 text-xs font-bold text-white shadow-md shadow-blue-600/10 transition cursor-pointer"
+            >
+              Sign in
+            </Link>
+          )}
 
         </div>
 
