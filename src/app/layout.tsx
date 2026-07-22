@@ -13,8 +13,20 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Hyrtica | Advanced Recruiting Platform",
-  description: "Enterprise hiring and candidate screening workspace powered by AI credentials analysis.",
+  title: "Hyrtica | AI-Powered Job & Candidate Search Platform",
+  description: "Match job listings to over 50,000+ candidate profiles instantly using vector search and AI resume parsing.",
+  openGraph: {
+    title: "Hyrtica | Modern Talent Matching Platform",
+    description: "Intelligent candidate matching engine powered by vector embeddings.",
+    url: "https://hyrtica-production.up.railway.app",
+    siteName: "Hyrtica",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Hyrtica",
+    description: "Intelligent candidate matching engine powered by vector embeddings.",
+  }
 };
 
 export default function RootLayout({
