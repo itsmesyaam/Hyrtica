@@ -78,6 +78,7 @@ export default function RecruiterDashboard() {
   const [searchQuery, setSearchQuery] = useState('')
   const [experienceFilter, setExperienceFilter] = useState<string>('all')
   const [locationFilter, setLocationFilter] = useState<string>('all')
+  const [noticeFilter, setNoticeFilter] = useState<string>('all')
   const [minSalaryFilter, setMinSalaryFilter] = useState<string>('0')
   const [selectedSkills, setSelectedSkills] = useState<string[]>([])
   const [aiSemanticMatch, setAiSemanticMatch] = useState<boolean>(true)
@@ -612,6 +613,25 @@ export default function RecruiterDashboard() {
                 <option value="Remote">Remote</option>
                 <option value="Hybrid">Hybrid</option>
                 <option value="On-site">On-site</option>
+              </select>
+            </div>
+
+            {/* Notice Period Filter (Naukri style) */}
+            <div className="flex flex-col gap-1.5">
+              <label htmlFor="notice-select" className="text-3xs font-extrabold text-slate-400 uppercase tracking-widest">
+                Notice Period
+              </label>
+              <select
+                id="notice-select"
+                value={noticeFilter}
+                onChange={e => setNoticeFilter(e.target.value)}
+                className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-xs text-slate-700 outline-none focus:border-blue-500 transition cursor-pointer"
+              >
+                <option value="all">All Notice Periods</option>
+                <option value="Immediate">Immediate Joiner</option>
+                <option value="15 Days">15 Days or less</option>
+                <option value="30 Days">30 Days or less</option>
+                <option value="60 Days">60 Days</option>
               </select>
             </div>
 
