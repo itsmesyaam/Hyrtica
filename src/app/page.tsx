@@ -2,6 +2,7 @@
 
 import React, { useState, useMemo, useEffect } from 'react'
 import Image from 'next/image'
+import Link from 'next/link'
 import Header from '@/components/Header'
 import Logo from '@/components/Logo'
 import { 
