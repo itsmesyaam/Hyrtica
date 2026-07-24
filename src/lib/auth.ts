@@ -5,7 +5,6 @@ import { PrismaAdapter } from '@auth/prisma-adapter'
 import prisma from '@/lib/prisma'
 
 export const authOptions: NextAuthOptions = {
-  adapter: prisma ? (PrismaAdapter(prisma) as any) : undefined,
   providers: [
     GoogleProvider({
       clientId: process.env.GOOGLE_CLIENT_ID || 'placeholder_google_client_id',
